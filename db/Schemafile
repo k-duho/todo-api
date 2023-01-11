@@ -1,0 +1,17 @@
+
+# NOTE: command: bundle exec ridgepole -c config/database.yml -f db/Schemafile --apply
+
+create_table "todo_lists", charset: "utf8mb4", force: :cascade do |t|
+  t.string "title", null: false
+  t.bigint "user_id", null: false
+  t.datetime "created_at", null: false
+  t.datetime "updated_at"
+end
+
+create_table "users", charset: "utf8mb4", force: :cascade do |t|
+  t.string "name", null: false
+  t.datetime "created_at", null: false
+  t.datetime "updated_at"
+end
+
+add_foreign_key "todo_lists", "users"
