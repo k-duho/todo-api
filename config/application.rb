@@ -30,7 +30,7 @@ module TodoApi
       g.skip_routes     false
       g.assets          false
       g.helper          false
-      g.test_framework :test_unit, fixture: false, controller: false, model: false
+      g.test_framework :rspec
     end
   end
 end
