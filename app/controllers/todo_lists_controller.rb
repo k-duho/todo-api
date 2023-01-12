@@ -3,7 +3,7 @@ class TodoListsController < ApplicationController
 
   # GET /todo_lists
   def index
-    @todo_lists = TodoList.all
+    @todo_lists = TodoList.where(finished: params[:finished])
 
     render json: { todo_lists: @todo_lists }
   end
