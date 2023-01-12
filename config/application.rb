@@ -25,7 +25,6 @@ module TodoApi
     config.api_only = true
 
     config.generators do |g|
-      p g.methods
       g.orm :active_record, migration: false
       g.skip_routes     false
       g.assets          false
