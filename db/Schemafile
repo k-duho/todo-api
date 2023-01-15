@@ -1,5 +1,5 @@
-
-# NOTE: command: bundle exec ridgepole -c config/database.yml -f db/Schemafile --apply
+# NOTE: sqlite3 command: sqlite3 development.sqlite3
+# NOTE: migrate command: bundle exec ridgepole -c config/database.yml -f db/Schemafile --apply
 
 create_table "todo_lists", charset: "utf8mb4", force: :cascade do |t|
   t.string "title", null: false
@@ -11,8 +11,47 @@ end
 
 create_table "users", charset: "utf8mb4", force: :cascade do |t|
   t.string "name", null: false
+  t.string "email", null: false
+  t.string "password_digest", null: false
   t.datetime "created_at", null: false
   t.datetime "updated_at"
 end
 
 add_foreign_key "todo_lists", "users"
+
+# NOTE: create_table methods
+#       t.primary_key	プライマリーキーを定義
+#       t.column	指定されたテーブルに新しいカラムを追加
+#       t.index	テーブルに新しいインデックスを追加
+#       t.rename_index	インデックスの名前を変更
+#       t.timestamps	created_atとupdated_atを両方追加するメソッド
+#       t.change	データベースのカラムを変更
+#       t.change_default	カラムに新しいデフォルト値を設定
+#       t.change_null	カラムにNOT NULL制約を設定または削除
+#       t.rename	カラムの名前を変更
+#       t.references	既存のテーブルにリファレンスを追加
+#       t.belongs_to	referencesのエイリアス
+#       t.check_constraint	チェック制約を追加
+#       t.string	String型を定義
+#       t.text	Text型を定義
+#       t.integer	Integer型を定義
+#       t.bigint	Bigint型を定義　
+#       t.float	Float型を定義
+#       t.decimal	Decimal型を定義　
+#       t.numeric	Numeric型を定義
+#       t.datetime	Datetime型を定義
+#       t.timestamp	Timestamp型を定義
+#       t.time	Time型を定義
+#       t.date	Date型を定義
+#       t.binary	Binary型を定義
+#       t.boolean	Boolean型を定義
+#       t.foreign_key	テーブルに外部キーを追加
+#       t.json	Join型を定義
+#       t.virtual	Virtual型を定義
+#       t.remove	テーブル定義からカラムを削除
+#       t.remove_foreign_key	外部キーをテーブルから削除　
+#       t.remove_references	リファレンスを削除
+#       t.remove_belongs_to	remove_referencesのエイリアス
+#       t.remove_index	インデックスを削除
+#       t.remove_check_constraint	チェック制約をテーブルから削除
+#       t.remove_timestamps	テーブルからタイムスタンプ列(created_at、updated_at)を削除
