@@ -18,7 +18,7 @@ class TodoListsController < ApplicationController
     @todo_list = TodoList.new(todo_list_params)
 
     if @todo_list.save
-      render json: { todo_list: @todo_list }, status: :created, location: @todo_list
+      render json: { todo_list: @todo_list }, status: :created
     else
       render json: @todo_list.errors, status: :unprocessable_entity
     end
