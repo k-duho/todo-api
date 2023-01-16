@@ -1,5 +1,6 @@
 # NOTE: sqlite3 command: sqlite3 development.sqlite3
 # NOTE: migrate command: bundle exec ridgepole -c config/database.yml -f db/Schemafile --apply
+# NOTE: test db command: bundle exec ridgepole -c config/database.yml -E test -f db/Schemafile --apply
 
 create_table "todo_lists", charset: "utf8mb4", force: :cascade do |t|
   t.string "title", null: false
