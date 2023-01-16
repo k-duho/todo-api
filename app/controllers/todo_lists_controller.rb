@@ -1,9 +1,10 @@
 class TodoListsController < ApplicationController
+  before_action :authenticate_user
   before_action :set_todo_list, only: %i[ show update destroy ]
 
   # GET /todo_lists
   def index
-    @todo_lists = TodoList.where(finished: params[:finished])
+    @todo_lists = TodoList.where(search_params.merge({ user_id: current_user.id }))
 
     render json: { todo_lists: @todo_lists }
   end
@@ -48,5 +49,9 @@ class TodoListsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def todo_list_params
     params.require(:todo_list).permit(:title, :user_id, :finished)
+  end
+
+  def search_params
+    params.permit(:finished).compact
   end
 end
