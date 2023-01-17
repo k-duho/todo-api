@@ -43,7 +43,7 @@ class TodoListsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_todo_list
-    @todo_list = TodoList.find(params[:id])
+    @todo_list = TodoList.find_by!(id: params[:id], user_id: current_user.id)
   end
 
   # Only allow a list of trusted parameters through.
