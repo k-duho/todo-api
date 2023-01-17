@@ -7,6 +7,27 @@ RSpec.describe "/todo_lists", type: :request do
   let!(:todo_list_b) { FactoryBot.create(:todo_list, title: "title-b", user_id: user_a.id) }
   let!(:todo_list_c) { FactoryBot.create(:todo_list, title: "title-c", user_id: user_b.id) }
 
+  shared_examples "return 401 error" do
+    it "returns 401 error" do
+      request
+      expect(response.status).to eq(401)
+    end
+  end
+
+  shared_examples "returns error" do |error_status|
+    it "returns error" do
+      request
+      expect(response.status).to eq(error_status)
+    end
+  end
+
+  shared_examples "update refresh token" do
+    it "update refresh token" do
+      request
+      expect { user_a.reload }.to change(user_a, :token)
+    end
+  end
+
   describe "GET /todo_lists" do
     subject(:request) { get todo_lists_url, headers: headers, as: :json }
 
@@ -16,20 +37,14 @@ RSpec.describe "/todo_lists", type: :request do
     context "when Authorization token is invalid" do
       let(:token) { "invalid token" }
 
-      it "returns 401 error" do
-        request
-        expect(response.status).to eq(401)
-      end
+      it_behaves_like "returns error", 401
     end
 
     context "when token is expired" do
       let(:token) { user_a.token }
       let(:token_expired_date) { Time.current.yesterday }
 
-      it "returns 401 error" do
-        request
-        expect(response.status).to eq(401)
-      end
+      it_behaves_like "returns error", 401
     end
 
     context "when token is valid" do
@@ -49,21 +64,56 @@ RSpec.describe "/todo_lists", type: :request do
       context "When the token expiration date is 5 minutes" do
         let(:token_expired_date) { Time.current + 4.minutes }
 
-        it "update refresh token" do
-          request
-          expect { user_a.reload }.to change(user_a, :token)
-        end
+        it_behaves_like "update refresh token"
       end
     end
   end
 
   describe "GET /todo_lists/:id" do
-    it "renders a successful response" do
-      todo_list = TodoList.create! valid_attributes
-      get todo_list_url(todo_list), as: :json
-      expect(response).to be_successful
+    subject(:request) { get todo_list_url(todo_list_a), headers: headers, as: :json }
 
-      parsed_json = JSON.parse(response.body)["todo_lists"]
+    let(:headers) { { Authorization: token } }
+    let(:token_expired_date) { Time.current.tomorrow }
+
+    context "when Authorization token is invalid" do
+      let(:token) { "invalid token" }
+
+      it_behaves_like "returns error", 401
+    end
+
+    context "when token is expired" do
+      let(:token) { user_a.token }
+      let(:token_expired_date) { Time.current.yesterday }
+
+      it_behaves_like "returns error", 401
+    end
+
+    context "when login user is user_a" do
+      let(:token) { user_a.token }
+
+      context "when todo_list_a's owner is user_a" do
+        it "returns todo_list_a's info" do
+          request
+          expect(response).to be_successful
+          parsed_json = JSON.parse(response.body)["todo_list"]
+
+          expect(parsed_json).to include({ "id" => 1, "title" => "title-a", "finished" => false, "user_id" => user_a.id })
+        end
+      end
+
+      context "when todo_list_a's owner is not user_a" do
+        before do
+          todo_list_a.update(user_id: user_b.id)
+        end
+
+        it_behaves_like "returns error", 404
+      end
+
+      context "When the token expiration date is 5 minutes" do
+        let(:token_expired_date) { Time.current + 4.minutes }
+
+        it_behaves_like "update refresh token"
+      end
     end
   end
 
