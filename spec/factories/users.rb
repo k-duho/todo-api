@@ -3,7 +3,7 @@ FactoryBot.define do
     name { "user-name" }
     email { "duho@duho.ho" }
     password { "password" }
-    token { "" }
+    token { SecureRandom.hex }
     token_expired_at { Time.current }
   end
 end
