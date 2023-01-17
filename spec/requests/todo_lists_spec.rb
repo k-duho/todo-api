@@ -117,39 +117,69 @@ RSpec.describe "/todo_lists", type: :request do
     end
   end
 
-  # describe "POST /create" do
-  #   context "with valid parameters" do
-  #     it "creates a new TodoList" do
-  #       expect {
-  #         post todo_lists_url,
-  #              params: { todo_list: valid_attributes }, headers: valid_headers, as: :json
-  #       }.to change(TodoList, :count).by(1)
-  #     end
+  describe "POST /create" do
+    subject(:request) { post todo_lists_url, params: params, headers: headers, as: :json }
 
-  #     it "renders a JSON response with the new todo_list" do
-  #       post todo_lists_url,
-  #            params: { todo_list: valid_attributes }, headers: valid_headers, as: :json
-  #       expect(response).to have_http_status(:created)
-  #       expect(response.content_type).to match(a_string_including("application/json"))
-  #     end
-  #   end
+    let(:headers) { { Authorization: token } }
+    let(:token_expired_date) { Time.current.tomorrow }
+    let(:params) { { title: "" } }
 
-  #   context "with invalid parameters" do
-  #     it "does not create a new TodoList" do
-  #       expect {
-  #         post todo_lists_url,
-  #              params: { todo_list: invalid_attributes }, as: :json
-  #       }.to change(TodoList, :count).by(0)
-  #     end
+    context "when Authorization token is invalid" do
+      let(:token) { "invalid token" }
 
-  #     it "renders a JSON response with errors for the new todo_list" do
-  #       post todo_lists_url,
-  #            params: { todo_list: invalid_attributes }, headers: valid_headers, as: :json
-  #       expect(response).to have_http_status(:unprocessable_entity)
-  #       expect(response.content_type).to match(a_string_including("application/json"))
-  #     end
-  #   end
-  # end
+      it_behaves_like "returns error", 401
+    end
+
+    context "when token is expired" do
+      let(:token) { user_a.token }
+      let(:token_expired_date) { Time.current.yesterday }
+
+      it_behaves_like "returns error", 401
+    end
+
+    context "when login user is user_a" do
+      let(:token) { user_a.token }
+      let(:params) { { title: "valid title" } }
+
+      it "creates user_a's new todo_list." do
+        expect { request }.to change(TodoList, :count).by(1)
+      end
+    end
+
+    context "with valid parameters" do
+      let(:token) { user_a.token }
+      let(:params) { { title: "new title" } }
+
+      it "creates a new todo_list" do
+        expect { request }.to change(TodoList, :count).by(1)
+      end
+
+      it "returns a new todo_list info" do
+        request
+        expect(response).to have_http_status :created
+        parsed_json = JSON.parse(response.body)["todo_list"]
+
+        expect(parsed_json).to include({ "title" => "new title", "finished" => false, "user_id" => user_a.id })
+      end
+    end
+
+    context "with invalid parameters" do
+      let(:token) { user_a.token }
+      let(:params) { { title: "" } }
+
+      it "does not create a new TodoList" do
+        expect { request }.to change(TodoList, :count).by(0)
+      end
+
+      it "returns a new todo_list info" do
+        request
+        expect(response).to have_http_status :unprocessable_entity
+        parsed_json = JSON.parse(response.body)
+
+        expect(parsed_json).to eq(["Title can't be blank"])
+      end
+    end
+  end
 
   # describe "PATCH /update" do
   #   context "with valid parameters" do

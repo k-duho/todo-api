@@ -4,7 +4,7 @@ class TodoListsController < ApplicationController
 
   # GET /todo_lists
   def index
-    @todo_lists = TodoList.where(search_params.merge({ user_id: current_user.id }))
+    @todo_lists = current_user.todo_lists.where(search_params)
 
     render json: { todo_lists: @todo_lists }
   end
@@ -16,12 +16,12 @@ class TodoListsController < ApplicationController
 
   # POST /todo_lists
   def create
-    @todo_list = TodoList.new(todo_list_params)
+    @todo_list = current_user.todo_lists.build(todo_list_params)
 
     if @todo_list.save
       render json: { todo_list: @todo_list }, status: :created
     else
-      render json: @todo_list.errors, status: :unprocessable_entity
+      render json: @todo_list.errors.full_messages, status: :unprocessable_entity
     end
   end
 
@@ -30,7 +30,7 @@ class TodoListsController < ApplicationController
     if @todo_list.update(todo_list_params)
       render json: { todo_list: @todo_list }
     else
-      render json: @todo_list.errors, status: :unprocessable_entity
+      render json: @todo_list.errors.full_messages, status: :unprocessable_entity
     end
   end
 
@@ -48,7 +48,7 @@ class TodoListsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def todo_list_params
-    params.require(:todo_list).permit(:title, :user_id, :finished)
+    params.require(:todo_list).permit(:title, :finished)
   end
 
   def search_params
