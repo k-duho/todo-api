@@ -15,7 +15,7 @@ create_table "users", charset: "utf8mb4", force: :cascade do |t|
   t.string "email", null: false
   t.string "password_digest", null: false
   t.string "token"
-  t.string "token_expired_at"
+  t.datetime "token_expired_at"
   t.datetime "created_at", null: false
   t.datetime "updated_at"
 end
